@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Configuration</title>
+    <link rel="stylesheet" href="/static/config.css">
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <h1>Slack Bot Configuration</h1>
+
+        <div class="nav-links">
+            <a href="/" class="nav-item">Dashboard</a>
+            <a href="/config" class="nav-item active">Configuration</a>
+        </div>
+    </div>
+</header>
+
+
+<main class="container">
+    <h2>Bot Configuration</h2>
+    <hr>
+
+    <form method="post" action="/config">
+
+        <label>BOT TOKEN</label><br>
+        <input type="password" id="bot_token" name="bot_token" value="{{ bot_token }}" style="width:100%; padding:8px;">
+        <label><input type="checkbox" onclick="toggleVisibility('bot_token')"> Show bot token</label>
+        <br>
+
+        <label>APP TOKEN</label><br>
+        <input type="password" id="app_token" name="app_token" value="{{ app_token }}" style="width:100%; padding:8px;">
+        <label><input type="checkbox" onclick="toggleVisibility('app_token')"> Show app token</label>
+        <br>
+
+        <label>API KEY</label><br>
+        <input type="password" id="api_key" name="api_key" value="{{ api_key }}" style="width:100%; padding:8px;">
+        <label><input type="checkbox" onclick="toggleVisibility('api_key')"> Show api key</label>
+        <br>
+
+        <label>LOCAL HOST</label><br>
+        <input type="text" name="local_host" value="{{ local_host }}" style="width:100%; padding:8px;"><br>
+
+        <label>ALLOWED GROUP CHANNEL IDS</label><br>
+        <input type="text" name="allowed_channels" value="{{ allowed_channels }}" style="width:100%; padding:8px;"><br>
+
+        <label>MODEL</label><br>
+        <input type="text" name="model" value="{{ model }}" style="width:100%; padding:8px;"><br>
+
+        <label>SYSTEM MESSAGE</label><br>
+        <textarea name="system_message" rows="8" style="width:100%; padding:10px;">{{ system_message }}</textarea>
+
+        <br>
+
+        <button type="submit">Save Configuration</button>
+
+    </form>
+</main>
+
+<script>
+    function toggleVisibility(id) {
+        const input = document.getElementById(id);
+        input.type = input.type === "password" ? "text" : "password";
+}
+</script>
+
+</body>
+</html>

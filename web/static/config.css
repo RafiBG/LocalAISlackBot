@@ -1,0 +1,148 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f6f9;
+    color: #212529;
+}
+
+/* Header */
+header {
+    background-color: #1b6ec2;
+    border-bottom: 1px solid #1861ac;
+    box-shadow: 0 2px 6px #000000;
+}
+
+.header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #fff;
+}
+
+/* Nav Links */
+.nav-links a {
+    margin-left: 15px;
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.nav-links a:hover {
+    background-color: #dcdcdc42;
+}
+
+.nav-links a.active {
+    background-color: #dcdcdc31;
+}
+
+/* Main Container */
+.container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px #00000066;
+    transition: box-shadow 0.2s ease;
+}
+
+.container:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Form Styles */
+form label {
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block;
+    color: #333;
+}
+
+form input[type="text"],
+form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+form input[type="text"]:focus,
+form textarea:focus {
+    outline: none;
+    border-color: #1b6ec2;
+    box-shadow: 0 0 0 3px #1b6ec2;
+}
+
+/* Makes password and text inputs look identical */
+form input[type="password"],
+form input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+    background-color: #fff;
+    color: #212529;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+form input[type="password"]:focus,
+form input[type="text"]:focus {
+    outline: none;
+    border-color: #1b6ec2;
+    box-shadow: 0 0 0 3px #1b6ec2;
+    background-color: #fff;
+}
+
+/* Button */
+form button {
+    background-color: #1b6ec2;
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+form button:hover {
+    background-color: #1861ac;
+    transform: translateY(-1px);
+}
+
+form button:active {
+    transform: translateY(0);
+}
+
+/* Headings */
+.container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #1b6ec2;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #dee2e6;
+    margin: 1rem 0 1.5rem 0;
+}

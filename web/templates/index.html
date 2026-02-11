@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slack Bot Management</title>
+    <title>Slack Bot</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -11,6 +11,11 @@
 <header>
     <div class="header-inner">
         <h1>Local AI Slack Bot Dashboard</h1>
+
+        <div class="nav-links">
+            <a href="/" class="nav-item active">Dashboard</a>
+            <a href="/config" class="nav-item">Configuration</a>
+        </div>
     </div>
 </header>
 
@@ -20,15 +25,15 @@
 
     <div class="status-box">
         <span class="status">
-    Status:
-    <span id="status-value" class="{{ status_class }}">
-        {{ status_text }}
-    </span>
-</span>
+            Status:
+            <span id="status-value" class="{{ status_class }}">
+                {{ status_text }}
+            </span>
+        </span>
 
-        <button id="toggle-btn" type="button">
-            {{ button_text }}
-        </button>
+        <button id="toggle-btn" type="button" class="{{ 'stop' if status_text == 'online' else 'start' }}">
+    {{ button_text }}
+</button>
     </div>
 
     <p class="note">
@@ -41,24 +46,34 @@
     const statusValue = document.getElementById("status-value");
 
     toggleBtn.addEventListener("click", async () => {
-        toggleBtn.disabled = true;
-        toggleBtn.textContent = "Updating...";
+    toggleBtn.disabled = true;
+    toggleBtn.textContent = "Updating...";
 
-        try {
-            const response = await fetch("/toggle_ajax", { method: "POST" });
-            const data = await response.json();
+    try {
+        const response = await fetch("/toggle_ajax", { method: "POST" });
+        const data = await response.json();
 
-            statusValue.textContent = data.status_text;
-            statusValue.className = data.status_class;
+        statusValue.textContent = data.status_text;
+        statusValue.className = data.status_class;
 
-            toggleBtn.textContent = data.button_text;
-        } catch (err) {
-            console.error("Error toggling bot:", err);
-            toggleBtn.textContent = "Error";
-        } finally {
-            toggleBtn.disabled = false;
+        toggleBtn.textContent = data.button_text;
+
+        // Update button color class
+        if (data.status_text === "online") {
+            toggleBtn.classList.remove("start");
+            toggleBtn.classList.add("stop");
+        } else {
+            toggleBtn.classList.remove("stop");
+            toggleBtn.classList.add("start");
         }
-    });
+
+    } catch (err) {
+        console.error("Error toggling bot:", err);
+        toggleBtn.textContent = "Error";
+    } finally {
+        toggleBtn.disabled = false;
+    }
+});
 </script>
 
 </body>

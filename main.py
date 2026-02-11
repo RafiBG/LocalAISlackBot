@@ -15,14 +15,14 @@ def main() -> None:
     llm_service = LLMService(config)
     
     # Open the browser after 1.5 seconds
-    #Timer(1.5, open_browser).start()
+    Timer(1.5, open_browser).start()
 
     # Start the FastAPI server
     uvicorn.run(
         "web.app:app",
         host="127.0.0.1",
         port=8000,
-        reload=False  # Set to False if opening browser automatically to avoid multiple tabs
+        reload=False
     )
 
 if __name__ == "__main__":
