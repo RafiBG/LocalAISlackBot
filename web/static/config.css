@@ -72,6 +72,7 @@ form label {
 }
 
 form input[type="text"],
+form input[type="number"],
 form textarea {
     width: 100%;
     padding: 10px;
@@ -83,6 +84,7 @@ form textarea {
 }
 
 form input[type="text"]:focus,
+form input[type="number"]:focus,
 form textarea:focus {
     outline: none;
     border-color: #1b6ec2;
@@ -145,4 +147,8 @@ hr {
     border: none;
     border-top: 1px solid #dee2e6;
     margin: 1rem 0 1.5rem 0;
+}
+
+.red-p {
+    color: red;
 }

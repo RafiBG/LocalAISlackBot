@@ -8,12 +8,11 @@ class Config:
 
         self.BOT_TOKEN = self._get_required("BOT_TOKEN")
         self.APP_TOKEN = self._get_required("APP_TOKEN")
-
         self.API_KEY = os.getenv("API_KEY", "")
         self.LOCAL_HOST = self._get_required("LOCAL_HOST")
         self.MODEL = self._get_required("MODEL")
         self.SYSTEM_MESSAGE = self._get_required("SYSTEM_MESSAGE")
-
+        self.SHORT_MEMORY = int(os.getenv("SHORT_MEMORY", "10"))
         self.ALLOWED_GROUP_CHANNEL_IDS = self._parse_channel_ids(
             os.getenv("ALLOWED_GROUP_CHANNEL_IDS", "")
         )

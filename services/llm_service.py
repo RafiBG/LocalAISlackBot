@@ -11,14 +11,11 @@ class LLMService:
         self.model = config.MODEL
         self.system_message = config.SYSTEM_MESSAGE
 
-    def generate_reply(self, prompt: str) -> str:
+    def generate_reply(self, messages: list) -> str:
+        # Instead of building the list here, we take the list from ChatMemoryService
         response = self.client.chat.completions.create(
-            model = self.model,
-            messages=[
-                {"role": "system", "content": self.system_message},
-                {"role": "user", "content": prompt},
-            ],
-            temperature = 0.7,
+            model=self.model,
+            messages=messages,
+            temperature=0.7,
         )
-
         return response.choices[0].message.content.strip()
