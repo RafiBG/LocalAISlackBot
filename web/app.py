@@ -20,10 +20,12 @@ config = Config()
 llm_service = LLMService(config)
 
 slack_bot = SlackBotService(
-    llm_service=llm_service,
-    bot_token=config.BOT_TOKEN,
-    app_token=config.APP_TOKEN,
-    allowed_channel_ids=config.ALLOWED_GROUP_CHANNEL_IDS,
+    llm_service = llm_service,
+    bot_token = config.BOT_TOKEN,
+    app_token = config.APP_TOKEN,
+    allowed_channel_ids = config.ALLOWED_GROUP_CHANNEL_IDS,
+    #system_message = config.SYSTEM_MESSAGE,
+    max_memory = config.SHORT_MEMORY,
 )
 
 bot_manager = BotManager(slack_bot)
@@ -76,6 +78,7 @@ async def config_page(request: Request):
             "allowed_channels": env_data.get("ALLOWED_GROUP_CHANNEL_IDS", ""),
             "model": env_data.get("MODEL", ""),
             "system_message": env_data.get("SYSTEM_MESSAGE", "").replace("\\n", "\n"),
+            "short_memory": env_data.get("SHORT_MEMORY", "10"),
         },
     )
 
@@ -89,6 +92,7 @@ async def save_config(
     allowed_channels: str = Form(""),
     model: str = Form(...),
     system_message: str = Form(...),
+    short_memory: str = Form(...),
 ):
     updates = {
         "BOT_TOKEN": bot_token,
@@ -98,6 +102,7 @@ async def save_config(
         "ALLOWED_GROUP_CHANNEL_IDS": allowed_channels,
         "MODEL": model,
         "SYSTEM_MESSAGE": system_message.replace("\n", "\\n"),
+        "SHORT_MEMORY": short_memory,
     }
 
     env_service.write_selected(updates)

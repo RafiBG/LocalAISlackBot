@@ -51,9 +51,12 @@
         <label>SYSTEM MESSAGE</label><br>
         <textarea name="system_message" rows="8" style="width:100%; padding:10px;">{{ system_message }}</textarea>
 
+        <label>Short Memory (Number of messages)</label><br>
+        <input type="number" name="short_memory" value="{{ short_memory }}" style="width:100%; padding:8px;"><br>
         <br>
 
         <button type="submit">Save Configuration</button>
+        <p class="red-p">After you press the save button restart the whole program for the changes to apply.</p>
 
     </form>
 </main>

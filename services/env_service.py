@@ -43,9 +43,22 @@ class EnvService:
             key, _ = stripped.split("=", 1)
 
             if key in updates:
-                new_lines.append(f"{key}={updates[key]}\n")
+                # Convert real newlines into the text "\n" 
+                # before writing to the file so the whole variable stays on ONE line.
+                value = str(updates[key]).replace("\n", "\\n").replace("\r", "")
+                new_lines.append(f"{key}={value}\n")
             else:
                 new_lines.append(line)
+
+        # Handle keys that might not exist in the file yet
+        existing_keys = {line.split("=", 1)[0].strip() for line in lines if "=" in line and not line.startswith("#")}
+        for key, value in updates.items():
+            if key not in existing_keys:
+                formatted_value = str(value).replace("\n", "\\n").replace("\r", "")
+                new_lines.append(f"{key}={formatted_value}\n")
+
+        with open(self.path, "w", encoding="utf-8") as f:
+            f.writelines(new_lines)
 
         with open(self.path, "w", encoding="utf-8") as f:
             f.writelines(new_lines)
