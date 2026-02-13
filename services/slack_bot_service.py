@@ -1,7 +1,6 @@
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from services.llm_service import LLMService
-from services.chat_memory_service import ChatMemoryService
 import time
 
 class SlackBotService:
@@ -14,7 +13,6 @@ class SlackBotService:
         max_memory: int = 10
     ) -> None:
         self.llm_service = llm_service
-        self.memory = ChatMemoryService(max_history_size=max_memory)
         self.allowed_channel_ids = allowed_channel_ids
         self.app_token = app_token
         self.app = App(token=bot_token)
@@ -24,49 +22,39 @@ class SlackBotService:
     def _register_handlers(self) -> None:
         @self.app.event("app_mention")
         def handle_mention(event, say):
-            channel_id = event.get("channel")
+            # Key for sharing memory in the same channel
+            conv_id = event.get("channel")
             user_id = event.get("user")
-            
-            if self.allowed_channel_ids is not None and channel_id not in self.allowed_channel_ids:
-                return
-            # Get username
+
+            # Get User Identity
             try:
-                user_info = self.app.client.users_info(user=user_id)
-                profile = user_info["user"]["profile"]
-                
-                # Try real_name, then display_name, then name, then fallback
-                username = profile.get("real_name") or profile.get("display_name") or profile.get("name") or "User"
-            except Exception as e:
-                print(f"Error fetching user info: {e}")
+                info = self.app.client.users_info(user=user_id)
+                username = info["user"]["profile"].get("real_name") or "User"
+            except:
                 username = "User"
 
-            # # Clean the text (remove bot mention)
+            # Clean text
             raw_text = event.get("text", "")
-            user_text = raw_text.split(">")[-1].strip() # Get everything after the mention
-            
-            # Add "User [Name]:" so the AI sees who said what
-            self.memory.add_message(user_id, "user", f"Context: I am talking to {username}. My message: {user_text}")
-            
-            # Get history
-            messages = self.memory.get_history(user_id, self.llm_service.system_message)
-            
-            # DEBUG: See exactly what is sent to the AI
-            #print(f"DEBUG: Sending to LLM: {messages}")
-            
-            # Generate reply
-            reply = self.llm_service.generate_reply(messages)
+            user_input = raw_text.split(">")[-1].strip()
 
-            print(f"DEBUG: {username}: {user_text} ")
-            print(f"DEBUG: AI: {reply} ")
+            # Get reply from LCEL Service
+            reply = self.llm_service.generate_reply(conv_id, f"{username}: {user_input}")
 
-            # Add assistant reply to memory
-            self.memory.add_message(user_id, "assistant", reply)
-            
+            #print(f"DEBUG:  {username}: {user_input}")
+            #print(f"DEBUG:  AI: {reply}")
+
             say(reply)
 
         @self.app.event("message")
-        def ignore_messages(event):
-            pass
+        def handle_message(event, say):
+            # Only trigger for Direct Messages (DMs)
+            if event.get("channel_type") == "im" and not event.get("bot_id"):
+                conv_id = event.get("channel")
+                user_input = event.get("text", "")
+                
+                reply = self.llm_service.generate_reply(conv_id, user_input)
+                say(reply)
+
 
     def run_sync(self) -> None:
         """Starts the bot synchronously. This blocks the thread it is called in."""
