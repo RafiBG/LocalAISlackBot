@@ -5,6 +5,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 # Import tool 
 from tools.time_tool import get_current_date, get_current_time
+from tools.serper_web_search import SerperSearchTool
 from config import Config
 
 class LLMService:
@@ -16,13 +17,15 @@ class LLMService:
             "model_name": config.MODEL,
             "temperature": 0.7
         }
-        # This acts as our memory. It's a simple Python dictionary.
+        # Memory
         self.history_db = {} 
 
+        self.serper_web_search_tool = SerperSearchTool(config.SERPER_API_KEY)
         # Tools available to the AI
         self.tools = [
             get_current_date,
-            get_current_time
+            get_current_time,
+            self.serper_web_search_tool.get_web_tool()
             ]
 
     def generate_reply(self, conversation_id: str, prompt: str) -> str:
@@ -56,6 +59,13 @@ class LLMService:
         })
         
         response = result["output"]
+
+        if not response:
+            if result.get("intermediate_steps"):
+                last_tool_result = result["intermediate_steps"][-1][1]
+                response = f"I've checked that for you: {last_tool_result}"
+            else:
+                response = "Error no response. Please try again or check if AI server is online!"
 
         # Update Memory
         self.history_db[conversation_id].append(HumanMessage(content=prompt))

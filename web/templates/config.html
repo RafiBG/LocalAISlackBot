@@ -24,35 +24,40 @@
 
     <form method="post" action="/config">
 
-        <label>BOT TOKEN</label><br>
+        <label>Bot Token</label><br>
         <input type="password" id="bot_token" name="bot_token" value="{{ bot_token }}" style="width:100%; padding:8px;">
         <label><input type="checkbox" onclick="toggleVisibility('bot_token')"> Show bot token</label>
         <br>
 
-        <label>APP TOKEN</label><br>
+        <label>App Token</label><br>
         <input type="password" id="app_token" name="app_token" value="{{ app_token }}" style="width:100%; padding:8px;">
         <label><input type="checkbox" onclick="toggleVisibility('app_token')"> Show app token</label>
         <br>
 
-        <label>API KEY</label><br>
+        <label>Api Key</label><br>
         <input type="password" id="api_key" name="api_key" value="{{ api_key }}" style="width:100%; padding:8px;">
         <label><input type="checkbox" onclick="toggleVisibility('api_key')"> Show api key</label>
         <br>
 
-        <label>LOCAL HOST</label><br>
+        <label>Local Host</label><br>
         <input type="text" name="local_host" value="{{ local_host }}" style="width:100%; padding:8px;"><br>
 
-        <label>ALLOWED GROUP CHANNEL IDS</label><br>
+        <label>Allowed Group Channels Ids</label><br>
         <input type="text" name="allowed_channels" value="{{ allowed_channels }}" style="width:100%; padding:8px;"><br>
 
-        <label>MODEL</label><br>
+        <label>Model</label><br>
         <input type="text" name="model" value="{{ model }}" style="width:100%; padding:8px;"><br>
 
-        <label>SYSTEM MESSAGE</label><br>
+        <label>System Message</label><br>
         <textarea name="system_message" rows="8" style="width:100%; padding:10px;">{{ system_message }}</textarea>
 
         <label>Short Memory (Number of messages)</label><br>
         <input type="number" name="short_memory" value="{{ short_memory }}" style="width:100%; padding:8px;"><br>
+        <br>
+
+        <label>Serper Web Search Key </label><br>
+        <input type="password" id="web_key" name="web_key" value="{{ web_key }}" style="width:100%; padding:8px;">
+        <label><input type="checkbox" onclick="toggleVisibility('web_key')"> Show web key</label>
         <br>
 
         <button type="submit">Save Configuration</button>

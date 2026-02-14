@@ -16,6 +16,7 @@ class Config:
         self.ALLOWED_GROUP_CHANNEL_IDS = self._parse_channel_ids(
             os.getenv("ALLOWED_GROUP_CHANNEL_IDS", "")
         )
+        self.SERPER_API_KEY = self._get_required("SERPER_API_KEY")
 
     def _get_required(self, name: str) -> str:
         value = os.getenv(name)
