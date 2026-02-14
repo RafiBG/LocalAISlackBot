@@ -61,6 +61,7 @@ async def config_page(request: Request):
             "model": env_data.get("MODEL", ""),
             "system_message": env_data.get("SYSTEM_MESSAGE", "").replace("\\n", "\n"),
             "short_memory": env_data.get("SHORT_MEMORY", "10"),
+            "web_key": env_data.get("SERPER_API_KEY"),
         },
     )
 
@@ -75,6 +76,7 @@ async def save_config(
     model: str = Form(...),
     system_message: str = Form(...),
     short_memory: str = Form(...),
+    web_key: str = Form(...),  # In html name = web_key
 ):
     updates = {
         "BOT_TOKEN": bot_token,
@@ -85,6 +87,7 @@ async def save_config(
         "MODEL": model,
         "SYSTEM_MESSAGE": system_message.replace("\n", "\\n"),
         "SHORT_MEMORY": short_memory,
+        "SERPER_API_KEY": web_key,
     }
 
     env_service.write_selected(updates)
