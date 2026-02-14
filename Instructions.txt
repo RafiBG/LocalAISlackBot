@@ -2,7 +2,7 @@ Create venv (virutal envoriment) and then install the libraries.
 
 Windows 11 or 10
 You must have Python version 3.11.9 (This version is tested)
-1. python -m venv venv
+1. python -3.11 -m venv venv or py -3.11 -m venv venv
 2. Set-ExecutionPolicy Unrestricted -Scope Process 
 3. \venv\Scripts\activate or .\\venv\Scripts\activate
 4. pip install -r requirements.txt
@@ -13,8 +13,9 @@ If there are some errors left try to install this
 
 pip install python-dotenv 
 pip install slack-bolt
-pip install openai
 pip install fastapi uvicorn
 pip install jinja2
 pip install httpx
 pip install python-multipart
+pip install langchain
+pip install langchain-openai langchain-core langchain-community
