@@ -6,6 +6,7 @@ from langchain.agents import create_tool_calling_agent, AgentExecutor
 # Import tool 
 from tools.time_tool import get_current_date, get_current_time
 from tools.serper_web_search import SerperSearchTool
+from tools.comfy_tool import ComfyUIImageTool
 from config import Config
 
 class LLMService:
@@ -21,11 +22,13 @@ class LLMService:
         self.history_db = {} 
 
         self.serper_web_search_tool = SerperSearchTool(config.SERPER_API_KEY)
+        self.comfy_image_tool = ComfyUIImageTool(config)
         # Tools available to the AI
         self.tools = [
             get_current_date,
             get_current_time,
-            self.serper_web_search_tool.get_web_tool()
+            self.serper_web_search_tool.get_web_tool(),
+            self.comfy_image_tool.get_tool(),
             ]
 
     def generate_reply(self, conversation_id: str, prompt: str) -> str:
@@ -49,7 +52,7 @@ class LLMService:
             tools=self.tools, 
             verbose=True,
             handle_parsing_errors=True,
-            max_iterations=5
+            max_iterations=3
         )
 
         # Run the Agent (it automatically handles the history and tool calls)

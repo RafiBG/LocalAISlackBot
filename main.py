@@ -9,7 +9,7 @@ from services.slack_bot_service import SlackBotService
 from services.bot_manager import BotManager
 
 def open_browser():
-    webbrowser.open("http://127.0.0.1:8000")
+    webbrowser.open("http://127.0.0.1:5000")
 
 def main():
         config = Config()
@@ -29,7 +29,7 @@ def main():
 
         Timer(2.0, open_browser).start()
 
-        uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
+        uvicorn.run(app, host="127.0.0.1", port=5000, log_level="info")
 
 if __name__ == "__main__":
     main()

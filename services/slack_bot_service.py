@@ -31,8 +31,8 @@ class SlackBotService:
             self.group_handler.handle(event, say, client)
 
         @self.app.event("message")
-        def handle_message(event, say):
-            self.private_handler.handle(event, say)
+        def handle_message(event, say, client):
+            self.private_handler.handle(event, say, client)
 
 
     def run_sync(self) -> None:
