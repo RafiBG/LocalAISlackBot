@@ -62,6 +62,11 @@ async def config_page(request: Request):
             "system_message": env_data.get("SYSTEM_MESSAGE", "").replace("\\n", "\n"),
             "short_memory": env_data.get("SHORT_MEMORY", "10"),
             "web_key": env_data.get("SERPER_API_KEY"),
+            "comfy_api": env_data.get("COMFYUI_API"),
+            "comfy_image_path": env_data.get("COMFYUI_IMAGE_PATH"),
+            "comfy_image_width": env_data.get("COMFYUI_IMAGE_WIDTH"),
+            "comfy_image_height": env_data.get("COMFYUI_IMAGE_HEIGHT"),
+            "comfy_steps": env_data.get("COMFYUI_STEPS"),
         },
     )
 
@@ -77,6 +82,12 @@ async def save_config(
     system_message: str = Form(...),
     short_memory: str = Form(...),
     web_key: str = Form(...),  # In html name = web_key
+    comfy_api: str = Form(...),
+    comfy_image_path: str = Form(...),
+    comfy_image_width: str = Form(...),
+    comfy_image_height: str = Form(...),
+    comfy_steps: str = Form(...),
+    
 ):
     updates = {
         "BOT_TOKEN": bot_token,
@@ -88,6 +99,11 @@ async def save_config(
         "SYSTEM_MESSAGE": system_message.replace("\n", "\\n"),
         "SHORT_MEMORY": short_memory,
         "SERPER_API_KEY": web_key,
+        "COMFYUI_API": comfy_api,
+        "COMFYUI_IMAGE_PATH": comfy_image_path,
+        "COMFYUI_IMAGE_WIDTH": comfy_image_width,
+        "COMFYUI_IMAGE_HEIGHT": comfy_image_height,
+        "COMFYUI_STEPS": comfy_steps,
     }
 
     env_service.write_selected(updates)

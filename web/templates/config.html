@@ -60,6 +60,31 @@
         <label><input type="checkbox" onclick="toggleVisibility('web_key')"> Show web key</label>
         <br>
 
+        <hr>
+        <h3>ComfyUI Image Settings</h3>
+        
+        <label>ComfyUI API URL (e.g., http://127.0.0.1:8188)</label><br>
+        <input type="text" name="comfy_api" value="{{ comfy_api }}" style="width:100%; padding:8px;"><br>
+
+        <label>Image Output Path (Local Folder)</label><br>
+        <input type="text" name="comfy_image_path" value="{{ comfy_image_path }}" style="width:100%; padding:8px;"><br>
+
+        <div style="display: flex; gap: 20px;">
+            <div style="flex: 1;">
+                <label>Width</label><br>
+                <input type="number" name="comfy_image_width" value="{{ comfy_image_width }}" style="width:100%; padding:8px;">
+            </div>
+            <div style="flex: 1;">
+                <label>Height</label><br>
+                <input type="number" name="comfy_image_height" value="{{ comfy_image_height }}" style="width:100%; padding:8px;">
+            </div>
+            <div style="flex: 1;">
+                <label>Steps</label><br>
+                <input type="number" name="comfy_steps" value="{{ comfy_steps }}" style="width:100%; padding:8px;">
+            </div>
+        </div>
+        <br>
+
         <button type="submit">Save Configuration</button>
         <p class="red-p">After you press the save button restart the whole program for the changes to apply.</p>
 

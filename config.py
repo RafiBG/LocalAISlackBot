@@ -17,6 +17,11 @@ class Config:
             os.getenv("ALLOWED_GROUP_CHANNEL_IDS", "")
         )
         self.SERPER_API_KEY = self._get_required("SERPER_API_KEY")
+        self.COMFYUI_API = self._get_required("COMFYUI_API")
+        self.COMFYUI_IMAGE_PATH = self._get_required("COMFYUI_IMAGE_PATH")
+        self.COMFYUI_IMAGE_WIDTH = self._get_required("COMFYUI_IMAGE_WIDTH")
+        self.COMFYUI_IMAGE_HEIGHT = self._get_required("COMFYUI_IMAGE_HEIGHT")
+        self.COMFYUI_STEPS = self._get_required("COMFYUI_STEPS")
 
     def _get_required(self, name: str) -> str:
         value = os.getenv(name)
