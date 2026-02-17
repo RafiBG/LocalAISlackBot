@@ -28,11 +28,16 @@ class SlackBotService:
     def _register_handlers(self) -> None:
         @self.app.event("app_mention")
         def handle_mention(event, say, client):
-            self.group_handler.handle(event, say, client)
+            # This only fires in channels/groups when @bot is tagged
+            thread_ts = event.get("thread_ts") or event.get("ts")
+            self.group_handler.handle(event, say, client, thread_ts)
 
         @self.app.event("message")
         def handle_message(event, say, client):
-            self.private_handler.handle(event, say, client)
+            # Check if this is a Direct Message (IM)
+            # This prevents the bot from replying twice in groups
+            if event.get("channel_type") == "im":
+                self.private_handler.handle(event, say, client)
 
 
     def run_sync(self) -> None:
