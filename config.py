@@ -22,6 +22,7 @@ class Config:
         self.COMFYUI_IMAGE_WIDTH = self._get_required("COMFYUI_IMAGE_WIDTH")
         self.COMFYUI_IMAGE_HEIGHT = self._get_required("COMFYUI_IMAGE_HEIGHT")
         self.COMFYUI_STEPS = self._get_required("COMFYUI_STEPS")
+        self.VISION_MODEL = self._get_required("VISION_MODEL")
 
     def _get_required(self, name: str) -> str:
         value = os.getenv(name)

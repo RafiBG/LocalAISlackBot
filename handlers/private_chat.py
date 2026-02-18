@@ -2,6 +2,7 @@ import threading
 import os
 import time
 import requests
+import base64
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, TextLoader
 
 class PrivateChatHandler:
@@ -25,23 +26,24 @@ class PrivateChatHandler:
         )
         msg_ts = initial_msg["ts"]
 
-        # File Processing
-        file_content = ""
+        # File Processing (Text + Images)
+        file_texts, file_images = [], []
+
         if "files" in event:
             client.chat_update(channel=conv_id, ts=msg_ts, text="_Reading files..._")
-            file_content = self._process_files(event["files"], client)
-            
-            if file_content:
-            # We use a very clear delimiter and a direct instruction
+            file_texts, file_images = self._process_files(event["files"], client)
+
+            if file_texts:
+                # Include the text content for context
                 user_input = (
                     "IMPORTANT: The user has uploaded a document. Use the following text to answer the question.\n"
                     "--- START OF DOCUMENT ---\n"
-                    f"{file_content}\n"
+                    f"{file_texts}\n"
                     "--- END OF DOCUMENT ---\n\n"
                     f"USER QUESTION: {user_input if user_input else 'Please summarize this document.'}"
-            )
+                )
             else:
-                # If extraction failed, we should know why
+                # Debug info
                 print("DEBUG: File extraction resulted in no text.")
 
         # Get LLM Response
@@ -49,8 +51,8 @@ class PrivateChatHandler:
         self.llm_service.comfy_image_tool.is_generating = False
 
         try:
-            # generate_reply should be your non-streaming method in LLMService
-            final_text = self.llm_service.generate_reply(conv_id, user_input)
+            # Pass images to LLM so it can analyze them
+            final_text = self.llm_service.generate_reply(conv_id, user_input, images=file_images)
         except Exception as e:
             print(f"LLM Error: {e}")
             final_text = "Sorry, I had trouble processing that request."
@@ -96,34 +98,74 @@ class PrivateChatHandler:
 
     def _process_files(self, files, client):
         extracted_text = []
-        token = client.token 
+        extracted_images = []
+        token = client.token
+
         for file_info in files:
             file_url = file_info.get("url_private_download")
-            if not file_url: continue
+            if not file_url:
+                continue
 
-            file_name = file_info.get('name')
-            temp_path = f"temp_dm_{int(time.time())}_{file_name}"
+            file_name = file_info.get("name")
+            temp_path = f"temp_{int(time.time())}_{file_name}"
             extension = os.path.splitext(file_name)[1].lower()
 
             try:
-                resp = requests.get(file_url, headers={"Authorization": f"Bearer {token}"}, stream=True)
-                if resp.status_code == 200:
-                    with open(temp_path, "wb") as f:
-                        for chunk in resp.iter_content(chunk_size=8192):
-                            f.write(chunk)
-                    
-                    time.sleep(0.5) 
-                    if extension == ".pdf": loader = PyPDFLoader(temp_path)
-                    elif extension in [".docx", ".doc"]: loader = Docx2txtLoader(temp_path)
-                    elif extension in [".txt", ".md", ".py", ".json", ".csv"]:
-                        loader = TextLoader(temp_path, encoding='utf-8')
-                    else: continue
+                resp = requests.get(
+                    file_url,
+                    headers={"Authorization": f"Bearer {token}"},
+                    stream=True
+                )
 
+                if resp.status_code != 200:
+                    continue
+
+                with open(temp_path, "wb") as f:
+                    for chunk in resp.iter_content(chunk_size=8192):
+                        f.write(chunk)
+
+                time.sleep(0.3)
+
+                # TEXT FILES
+                if extension == ".pdf":
+                    loader = PyPDFLoader(temp_path)
                     docs = loader.load()
                     content = "\n".join([d.page_content for d in docs])
                     extracted_text.append(f"--- FILE: {file_name} ---\n{content}")
+
+                elif extension in [".docx", ".doc"]:
+                    loader = Docx2txtLoader(temp_path)
+                    docs = loader.load()
+                    content = "\n".join([d.page_content for d in docs])
+                    extracted_text.append(f"--- FILE: {file_name} ---\n{content}")
+
+                elif extension in [".txt", ".md", ".py", ".json", ".csv"]:
+                    loader = TextLoader(temp_path, encoding="utf-8")
+                    docs = loader.load()
+                    content = "\n".join([d.page_content for d in docs])
+                    extracted_text.append(f"--- FILE: {file_name} ---\n{content}")
+
+                # IMAGE FILES
+                elif extension in [".png", ".jpg", ".jpeg"]:
+                    with open(temp_path, "rb") as img_file:
+                        encoded = base64.b64encode(img_file.read()).decode("utf-8")
+                        extracted_images.append({
+                            "filename": file_name,
+                            "base64": encoded
+                        })
+
+                else:
+                    print(f"Unsupported file type: {extension}")
+
             except Exception as e:
-                print(f"Error processing {file_name} in DM: {e}")
+                print(f"Error processing {file_name}: {e}")
+
             finally:
-                if os.path.exists(temp_path): os.remove(temp_path)
-        return "\n\n".join(extracted_text)
+                if os.path.exists(temp_path):
+                    try:
+                        os.remove(temp_path)
+                    except Exception as e:
+                        print(f"Could not delete temp file: {e}")
+
+        # Return must be OUTSIDE the loop
+        return extracted_text, extracted_images

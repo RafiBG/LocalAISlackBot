@@ -3,6 +3,7 @@ import os
 import time
 import re
 import requests
+import base64
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, TextLoader
 
 class GroupChatHandler:
@@ -20,7 +21,7 @@ class GroupChatHandler:
         # Strip bot mention
         user_input = re.sub(r'<@.*?>', '', raw_text).strip()
 
-        # 1. Initial Placeholder
+        # Initial Placeholder
         initial_msg = client.chat_postMessage(
             channel=conv_id, 
             thread_ts=thread_ts,
@@ -37,14 +38,13 @@ class GroupChatHandler:
                 thread_ts=thread_ts,
                 text="_Reading your uploaded files..._"
             )
-            file_content = self._process_files(event["files"], client)
+            file_texts, file_images = self._process_files(event["files"], client)
             
-            if file_content:
-                # Mirroring the private chat fix: Make the context impossible to ignore
+            if file_texts:
                 user_input = (
                     "IMPORTANT: The user has provided the following document context.\n"
                     "--- START OF DOCUMENT ---\n"
-                    f"{file_content}\n"
+                    f"{file_texts}\n"
                     "--- END OF DOCUMENT ---\n\n"
                     f"USER QUESTION: {user_input if user_input else 'Please analyze these files.'}"
                 )
@@ -54,7 +54,7 @@ class GroupChatHandler:
         self.llm_service.comfy_image_tool.is_generating = False
 
         try:
-            final_text = self.llm_service.generate_reply(conv_id, user_input)
+            final_text = self.llm_service.generate_reply(conv_id, user_input, images = file_images)
         except Exception as e:
             print(f"Group LLM Error: {e}")
             final_text = "I'm sorry, I hit a snag while processing that group request."
@@ -90,46 +90,68 @@ class GroupChatHandler:
 
     def _process_files(self, files, client):
         extracted_text = []
-        token = client.token 
-        
+        extracted_images = []
+        token = client.token
+
         for file_info in files:
             file_url = file_info.get("url_private_download")
             if not file_url:
                 continue
 
-            file_name = file_info.get('name')
+            file_name = file_info.get("name")
             temp_path = f"temp_{int(time.time())}_{file_name}"
             extension = os.path.splitext(file_name)[1].lower()
 
             try:
-                resp = requests.get(file_url, headers={"Authorization": f"Bearer {token}"}, stream=True)
-                
-                if resp.status_code == 200:
-                    with open(temp_path, "wb") as f:
-                        for chunk in resp.iter_content(chunk_size=8192):
-                            f.write(chunk)
-                    
-                    # Ensure file is written before loading
-                    time.sleep(0.5) 
+                resp = requests.get(
+                    file_url,
+                    headers={"Authorization": f"Bearer {token}"},
+                    stream=True
+                )
 
-                    # Route to correct loader
-                    if extension == ".pdf":
-                        loader = PyPDFLoader(temp_path)
-                    elif extension in [".docx", ".doc"]:
-                        loader = Docx2txtLoader(temp_path)
-                    elif extension in [".txt", ".md", ".py", ".json", ".csv"]:
-                        loader = TextLoader(temp_path, encoding='utf-8')
-                    else:
-                        print(f"Unsupported file type: {extension}")
-                        continue
+                if resp.status_code != 200:
+                    continue
 
+                with open(temp_path, "wb") as f:
+                    for chunk in resp.iter_content(chunk_size=8192):
+                        f.write(chunk)
+
+                time.sleep(0.3)
+
+                # TEXT FILES
+                if extension == ".pdf":
+                    loader = PyPDFLoader(temp_path)
                     docs = loader.load()
                     content = "\n".join([d.page_content for d in docs])
                     extracted_text.append(f"--- FILE: {file_name} ---\n{content}")
 
+                elif extension in [".docx", ".doc"]:
+                    loader = Docx2txtLoader(temp_path)
+                    docs = loader.load()
+                    content = "\n".join([d.page_content for d in docs])
+                    extracted_text.append(f"--- FILE: {file_name} ---\n{content}")
+
+                elif extension in [".txt", ".md", ".py", ".json", ".csv"]:
+                    loader = TextLoader(temp_path, encoding="utf-8")
+                    docs = loader.load()
+                    content = "\n".join([d.page_content for d in docs])
+                    extracted_text.append(f"--- FILE: {file_name} ---\n{content}")
+
+                # IMAGE FILES
+                elif extension in [".png", ".jpg", ".jpeg"]:
+                    with open(temp_path, "rb") as img_file:
+                        encoded = base64.b64encode(img_file.read()).decode("utf-8")
+                        extracted_images.append({
+                            "filename": file_name,
+                            "base64": encoded
+                        })
+
+                else:
+                    print(f"Unsupported file type: {extension}")
+
             except Exception as e:
-                print(f"Error processing {file_name}: {str(e)}")
-            
+                print(f"Error processing {file_name}: {e}")
+
             finally:
                 if os.path.exists(temp_path):
                     try:
@@ -137,7 +159,9 @@ class GroupChatHandler:
                     except Exception as e:
                         print(f"Could not delete temp file: {e}")
 
-        return "\n\n".join(extracted_text)
+        # Return must be OUTSIDE the loop
+        return extracted_text, extracted_images
+
     
     def _image_watcher_thread(self, channel, client, thread_ts):
         """Monitors folder for new images and uploads them as a standalone message in the group."""

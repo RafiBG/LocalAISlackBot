@@ -67,6 +67,7 @@ async def config_page(request: Request):
             "comfy_image_width": env_data.get("COMFYUI_IMAGE_WIDTH"),
             "comfy_image_height": env_data.get("COMFYUI_IMAGE_HEIGHT"),
             "comfy_steps": env_data.get("COMFYUI_STEPS"),
+            "vision_model": env_data.get("VISION_MODEL"),
         },
     )
 
@@ -87,6 +88,8 @@ async def save_config(
     comfy_image_width: str = Form(...),
     comfy_image_height: str = Form(...),
     comfy_steps: str = Form(...),
+    vision_model: str = Form(...),
+    
     
 ):
     updates = {
@@ -104,6 +107,7 @@ async def save_config(
         "COMFYUI_IMAGE_WIDTH": comfy_image_width,
         "COMFYUI_IMAGE_HEIGHT": comfy_image_height,
         "COMFYUI_STEPS": comfy_steps,
+        "VISION_MODEL": vision_model,
     }
 
     env_service.write_selected(updates)
