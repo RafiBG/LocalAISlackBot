@@ -19,3 +19,5 @@ pip install httpx
 pip install python-multipart
 pip install langchain
 pip install langchain-openai langchain-core langchain-community
+pip install docx2txt
+pip install pypdf
